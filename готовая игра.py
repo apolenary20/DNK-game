@@ -3,7 +3,6 @@ import pygame as pg
 #from Nucleozid import *
 import pygame.freetype
 #from Iscander import *
-
 SCREEN_SIZE = (1000, 700)
 pg.init()
 screen = pg.display.set_mode(SCREEN_SIZE)
@@ -27,36 +26,43 @@ c0 = 140
 c1 = org
 PO4 = 5
 FONT = pg.freetype.Font(None, size)
-seq = "ACGTAATGCTCGATGGATGCTAGCTACGT"
+seq = "ACGTAATGCTCGATGGATGCTAGCTACGTACTGGTAACGTCGATCATTTGCAC"
 
-'''Часть Артема'''
+'''Часть Артема
+   Задает параметры построения РНК при нажатии клавишь
+   фунцкия Ad-строит аденин
+           Cyt строит цитозин
+           Gua-строит гуанин
+           Ura-строит урацил'''
 def Ad(a,y,h):
     pg.draw.polygon(screen, RED,[(a,y),(a+h,y),(a+h,y+h),(a+int(h/2),y+int(h*1.5)),(a,y+h)])
-    pg.draw.line(screen, CYAN,(a+h,y+int(h/2)),(a+int(h*2),y+int(h/2)),5)
+    pg.draw.line(screen, CYAN,(a+h,y+int(h/2)),(a+int(h*1.5),y+int(h/2)),5)
     FONT.render_to(screen, (a+4,y+2), "A", (255, 255, 255))
     pg.display.update()
 
 def Cyt(a,y,h):
     pg.draw.polygon(screen, MAGENTA,[(a,y),(a+h,y),(a+h,y+h),(a+int(0.7*h),y+h),(a+int(0.7*h),y+int(1.5*h)),
                                      (a+int(0.3*h),y+int(1.5*h)),(a+int(0.3*h),y+h), (a,y+h)])
-    pg.draw.line(screen, CYAN,(a+h,y+int(0.5*h)),(a+2*h,y+int(h/2)),5)
+    pg.draw.line(screen, CYAN,(a+h,y+int(0.5*h)),(a+int(h*1.5),y+int(h/2)),5)
     FONT.render_to(screen, (a+4,y+2), "C", (255, 255, 255))
     pg.display.update()
 
 def Gua( a, y,h):
     pg.draw.polygon(screen, YELLOW, [(a, y), (a + h, y), (a + h, y + int(1.5*h)), (a + int(0.7*h), y + int(1.5*h)),
                                      (a+int(0.7*h), y + h),(a+int(0.3*h),y+h),(a+int(0.3*h),y+int(1.5*h)),(a,y+int(1.5*h))])
-    pg.draw.line(screen, CYAN, (a + h, y + int(0.5 * h)), (a + 2 * h, y + int(h / 2)), 5)
+    pg.draw.line(screen, CYAN, (a + h, y + int(0.5 * h)), (a + int(h*1.5), y + int(h / 2)), 5)
     FONT.render_to(screen, (a + 4, y + 2), "G", (255, 255, 255))
     pg.display.update()
 def Ura(a, y,h):
     pg.draw.polygon(screen, GREEN, [(a, y), (a + h, y), (a + h, y + int(1.5*h)), (a + int(h / 2), y + h),
                                     (a, y + int(1.5*h)),(a+int(0.3*h),y+h)])
-    pg.draw.line(screen, CYAN, (a + h, y + int(0.5 * h)), (a + 2 * h, y + int(h / 2)), 5)
+    pg.draw.line(screen, CYAN, (a + h, y + int(0.5 * h)), (a + int(h*1.5), y + int(h / 2)), 5)
     FONT.render_to(screen, (a + 4, y + 2), "U", (255, 255, 255))
     pygame.display.update()
 
-'''Часть Искандера'''
+'''Часть Искандера
+    отвечает за построение ДНК и 
+    РНК-полимиразы'''
 def a_draw(coord, size):
     pg.draw.rect(screen, RED, (coord[0], coord[1], size, size))
     pg.draw.polygon(screen, RED, [(coord[0], coord[1]),
@@ -149,12 +155,18 @@ for i in range(len(seq)):
     if seq[i] == 'C':
         c_draw([c0 + (size + PO4) * i, SCREEN_SIZE[1] - 200], size)
         g_draw([c0 + (size + PO4) * i, SCREEN_SIZE[1] - 150], size)
-'''Часть Артема'''
+
+'''Часть Артема 
+   в этой части уже идет взаимодействие с клавиатурой
+   и само построение РНК
+   при нажатии клавиши 'G,U,C,A' 
+   появляются соответственно гуанин,
+   урацил, цитозин и Аденин'''
 pg.draw.line(screen,WHITE,(0,int(SCREEN_SIZE[1]/2)),(SCREEN_SIZE[0],int(SCREEN_SIZE[1]/2)))
 pg.display.update()
-x=10
+x=110
 z=450
-h=20
+h=15
 count=0
 finished = False
 str1=''
@@ -168,19 +180,19 @@ while not finished:
         elif event.type == pg.KEYDOWN:
             if event.key == pg.K_u:
                 Ura(x, z,h)
-                x+=2*h
+                x+=int(h*1.5)
                 str1+='A'
             elif event.key == pg.K_a:
                 Ad(x, z,h)
-                x+=2*h
+                x+=int(h*1.5)
                 str1 += 'T'
             elif event.key == pg.K_c:
                 Cyt(x, z,h)
-                x+=2*h
+                x+=int(h*1.5)
                 str1 += 'G'
             elif event.key == pg.K_g:
                 Gua(x, z,h)
-                x+=2*h
+                x+=int(h*1.5)
                 str1 += 'C'
             c1 += (size + PO4)
             count+=1
@@ -205,14 +217,15 @@ for i in range(len(seq)):
         popal+=1
 procent=int(popal/len(seq)*100)
 
-FONT=pygame.freetype.Font(None, 30)
+FONT=pygame.freetype.Font(None, 20)
 FONT.render_to(screen, (50, 50), "Истинная строка " + seq, ORANGE)
 FONT.render_to(screen, (50, 150), "Ваша  строка " + str1, ORANGE)
-FONT.render_to(screen, (50, 250), "Вы биотехнолог на " + str(procent)+'%', ORANGE)
-
+FONT1=pygame.freetype.Font(None, 20)
+FONT1.render_to(screen, (50, 250), "Вы биотехнолог на " + str(procent)+'%', ORANGE)
 pg.display.update()
-
 clock = pygame.time.Clock()
+clock.tick(1)
+
 finished = False
 while not finished:
     clock.tick(FPS)
