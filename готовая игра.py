@@ -3,6 +3,7 @@ import pygame as pg
 #from Nucleozid import *
 import pygame.freetype
 #from Iscander import *
+import thorpy
 SCREEN_SIZE = (1000, 700)
 pg.init()
 screen = pg.display.set_mode(SCREEN_SIZE)
@@ -59,6 +60,12 @@ def Ura(a, y,h):
     pg.draw.line(screen, CYAN, (a + h, y + int(0.5 * h)), (a + int(h*1.5), y + int(h / 2)), 5)
     FONT.render_to(screen, (a + 4, y + 2), "U", (255, 255, 255))
     pygame.display.update()
+def start_execution():
+    """Обработчик события нажатия на кнопку Start.
+    Запускает циклическое исполнение функции execution.
+    """
+    global perform_execution
+    perform_execution = True
 
 '''Часть Искандера
     отвечает за построение ДНК и 
@@ -142,26 +149,27 @@ def Pasa(coord):
     a = pg.transform.rotate(a, 90)
     screen.blit(a, (c1, -420))
 
-for i in range(len(seq)):
-    if seq[i] == 'A':
-        a_draw([c0 + (size + PO4) * i, SCREEN_SIZE[1] - 200], size)
-        t_draw([c0 + (size + PO4) * i, SCREEN_SIZE[1] - 150], size)
-    if seq[i] == 'G':
-        g_draw([c0 + (size + PO4) * i, SCREEN_SIZE[1] - 200], size)
-        c_draw([c0 + (size + PO4) * i, SCREEN_SIZE[1] - 150], size)
-    if seq[i] == 'T':
-        t_draw([c0 + (size + PO4) * i, SCREEN_SIZE[1] - 200], size)
-        a_draw([c0 + (size + PO4) * i, SCREEN_SIZE[1] - 150], size)
-    if seq[i] == 'C':
-        c_draw([c0 + (size + PO4) * i, SCREEN_SIZE[1] - 200], size)
-        g_draw([c0 + (size + PO4) * i, SCREEN_SIZE[1] - 150], size)
-
 '''Часть Артема 
    в этой части уже идет взаимодействие с клавиатурой
    и само построение РНК
    при нажатии клавиши 'G,U,C,A' 
    появляются соответственно гуанин,
    урацил, цитозин и Аденин'''
+button_play = thorpy.make_button("Play",start_execution)
+timer = thorpy.OneLineText("Seconds passed")
+box = thorpy.Box(elements=[
+    button_play,
+    timer])
+my_reaction = thorpy.Reaction(reacts_to=thorpy.constants.THORPY_EVENT,
+                              reac_func=start_execution)
+menu = thorpy.Menu(box)
+for element in menu.get_population():
+    element.surface = screen
+
+box.set_topleft((0, 0))
+box.blit()
+box.update()
+
 pg.draw.line(screen,WHITE,(0,int(SCREEN_SIZE[1]/2)),(SCREEN_SIZE[0],int(SCREEN_SIZE[1]/2)))
 pg.display.update()
 x=110
@@ -170,6 +178,7 @@ h=15
 count=0
 finished = False
 str1=''
+perform_execution = False
 while not finished:
     clock.tick(FPS)
     DNA(org)
@@ -177,37 +186,53 @@ while not finished:
     for event in pg.event.get():
         if event.type == pg.QUIT:
             finished = True
+        elif event.type == pg.MOUSEBUTTONDOWN:
+            menu.react(event)
+            if perform_execution:
+                for i in range(len(seq)):
+                    if seq[i] == 'A':
+                        a_draw([c0 + (size + PO4) * i, SCREEN_SIZE[1] - 200], size)
+                        t_draw([c0 + (size + PO4) * i, SCREEN_SIZE[1] - 150], size)
+                    if seq[i] == 'G':
+                        g_draw([c0 + (size + PO4) * i, SCREEN_SIZE[1] - 200], size)
+                        c_draw([c0 + (size + PO4) * i, SCREEN_SIZE[1] - 150], size)
+                    if seq[i] == 'T':
+                        t_draw([c0 + (size + PO4) * i, SCREEN_SIZE[1] - 200], size)
+                        a_draw([c0 + (size + PO4) * i, SCREEN_SIZE[1] - 150], size)
+                    if seq[i] == 'C':
+                        c_draw([c0 + (size + PO4) * i, SCREEN_SIZE[1] - 200], size)
+                        g_draw([c0 + (size + PO4) * i, SCREEN_SIZE[1] - 150], size)
+
         elif event.type == pg.KEYDOWN:
             if event.key == pg.K_u:
-                Ura(x, z,h)
-                x+=int(h*1.5)
-                str1+='A'
+                Ura(x, z, h)
+                x += int(h * 1.5)
+                str1 += 'A'
             elif event.key == pg.K_a:
-                Ad(x, z,h)
-                x+=int(h*1.5)
+                Ad(x, z, h)
+                x += int(h * 1.5)
                 str1 += 'T'
             elif event.key == pg.K_c:
-                Cyt(x, z,h)
-                x+=int(h*1.5)
+                Cyt(x, z, h)
+                x += int(h * 1.5)
                 str1 += 'G'
             elif event.key == pg.K_g:
-                Gua(x, z,h)
-                x+=int(h*1.5)
+                Gua(x, z, h)
+                x += int(h * 1.5)
                 str1 += 'C'
             c1 += (size + PO4)
-            count+=1
-    if x>800:
-        pg.draw.rect(screen, BLACK,(0,z,SCREEN_SIZE[0],2*h))
-        x=10
+            count += 1
+    if x > 800:
+        pg.draw.rect(screen, BLACK, (0, z, SCREEN_SIZE[0], 2 * h))
+        x = 10
     if c1 >= SCREEN_SIZE[0] - 100:
         org -= SCREEN_SIZE[0] * 2 // 3
         c0 -= SCREEN_SIZE[0] * 2 // 3
         c1 -= SCREEN_SIZE[0] * 2 // 3
         pg.draw.rect(screen, BLACK, (0, SCREEN_SIZE[1] - 220, SCREEN_SIZE[0], SCREEN_SIZE[1]))
-    if count==len(seq):
-        finished =True
+    if count == len(seq):
+        finished = True
 pg.quit()
-
 pg.init()
 FPS = 30
 popal=0
