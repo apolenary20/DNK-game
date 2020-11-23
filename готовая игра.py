@@ -6,6 +6,7 @@ import pygame.freetype
 import thorpy
 SCREEN_SIZE = (1000, 700)
 pg.init()
+name=input()
 screen = pg.display.set_mode(SCREEN_SIZE)
 clock = pg.time.Clock()
 
@@ -27,7 +28,7 @@ c0 = 140
 c1 = org
 PO4 = 5
 FONT = pg.freetype.Font(None, size)
-seq = "ACGTAATGCTCGATGGATGCTAGCTACGTACTGGTAACGTCGATCATTTGCAC"
+seq = "ACGTAATGCTCGATGGATGCTAGCTACGTACTGGTACAC"
 
 '''Часть Артема
    Задает параметры построения РНК при нажатии клавишь
@@ -37,27 +38,27 @@ seq = "ACGTAATGCTCGATGGATGCTAGCTACGTACTGGTAACGTCGATCATTTGCAC"
            Ura-строит урацил'''
 def Ad(a,y,h):
     pg.draw.polygon(screen, RED,[(a,y),(a+h,y),(a+h,y+h),(a+int(h/2),y+int(h*1.5)),(a,y+h)])
-    pg.draw.line(screen, CYAN,(a+h,y+int(h/2)),(a+int(h*1.5),y+int(h/2)),5)
+    pg.draw.line(screen, CYAN,(a+h,y+int(h/2)),(a+int(h*length),y+int(h/2)),5)
     FONT.render_to(screen, (a+4,y+2), "A", (255, 255, 255))
     pg.display.update()
 
 def Cyt(a,y,h):
     pg.draw.polygon(screen, MAGENTA,[(a,y),(a+h,y),(a+h,y+h),(a+int(0.7*h),y+h),(a+int(0.7*h),y+int(1.5*h)),
-                                     (a+int(0.3*h),y+int(1.5*h)),(a+int(0.3*h),y+h), (a,y+h)])
-    pg.draw.line(screen, CYAN,(a+h,y+int(0.5*h)),(a+int(h*1.5),y+int(h/2)),5)
+                                     (a+int(0.3*h),y+int(1.3*h)),(a+int(0.3*h),y+h), (a,y+h)])
+    pg.draw.line(screen, CYAN,(a+h,y+int(0.5*h)),(a+int(h*length),y+int(h/2)),5)
     FONT.render_to(screen, (a+4,y+2), "C", (255, 255, 255))
     pg.display.update()
 
 def Gua( a, y,h):
     pg.draw.polygon(screen, YELLOW, [(a, y), (a + h, y), (a + h, y + int(1.5*h)), (a + int(0.7*h), y + int(1.5*h)),
                                      (a+int(0.7*h), y + h),(a+int(0.3*h),y+h),(a+int(0.3*h),y+int(1.5*h)),(a,y+int(1.5*h))])
-    pg.draw.line(screen, CYAN, (a + h, y + int(0.5 * h)), (a + int(h*1.5), y + int(h / 2)), 5)
+    pg.draw.line(screen, CYAN, (a + h, y + int(0.5 * h)), (a + int(h*length), y + int(h / 2)), 5)
     FONT.render_to(screen, (a + 4, y + 2), "G", (255, 255, 255))
     pg.display.update()
 def Ura(a, y,h):
     pg.draw.polygon(screen, GREEN, [(a, y), (a + h, y), (a + h, y + int(1.5*h)), (a + int(h / 2), y + h),
                                     (a, y + int(1.5*h)),(a+int(0.3*h),y+h)])
-    pg.draw.line(screen, CYAN, (a + h, y + int(0.5 * h)), (a + int(h*1.5), y + int(h / 2)), 5)
+    pg.draw.line(screen, CYAN, (a + h, y + int(0.5 * h)), (a + int(h*length), y + int(h / 2)), 5)
     FONT.render_to(screen, (a + 4, y + 2), "U", (255, 255, 255))
     pygame.display.update()
 def start_execution():
@@ -155,26 +156,30 @@ def Pasa(coord):
    при нажатии клавиши 'G,U,C,A' 
    появляются соответственно гуанин,
    урацил, цитозин и Аденин'''
-button_play = thorpy.make_button("Play",start_execution)
-timer = thorpy.OneLineText("Seconds passed")
-box = thorpy.Box(elements=[
-    button_play,
-    timer])
-my_reaction = thorpy.Reaction(reacts_to=thorpy.constants.THORPY_EVENT,
-                              reac_func=start_execution)
-menu = thorpy.Menu(box)
-for element in menu.get_population():
-    element.surface = screen
+def Menu():
+    '''Создает окно запуска'''
+    button_play = thorpy.make_button("Play",start_execution)
+    timer = thorpy.OneLineText("Seconds passed")
+    box = thorpy.Box(elements=[
+        button_play,
+        timer])
+    my_reaction = thorpy.Reaction(reacts_to=thorpy.constants.THORPY_EVENT,
+                                  reac_func=start_execution)
+    menu = thorpy.Menu(box)
+    for element in menu.get_population():
+        element.surface = screen
 
-box.set_topleft((0, 0))
-box.blit()
-box.update()
-
+    box.set_topleft((0, 0))
+    box.blit()
+    box.update()
+    return menu,box,timer
+menu,box,timer = Menu()
 pg.draw.line(screen,WHITE,(0,int(SCREEN_SIZE[1]/2)),(SCREEN_SIZE[0],int(SCREEN_SIZE[1]/2)))
 pg.display.update()
 x=110
 z=450
 h=15
+length=1.55
 count=0
 finished = False
 str1=''
@@ -206,25 +211,31 @@ while not finished:
         elif event.type == pg.KEYDOWN:
             if event.key == pg.K_u:
                 Ura(x, z, h)
-                x += int(h * 1.5)
+                x += int(h * length)
                 str1 += 'A'
+                c1 += (size + PO4)
+                count += 1
             elif event.key == pg.K_a:
                 Ad(x, z, h)
-                x += int(h * 1.5)
+                x += int(h * length)
                 str1 += 'T'
+                c1 += (size + PO4)
+                count += 1
             elif event.key == pg.K_c:
                 Cyt(x, z, h)
-                x += int(h * 1.5)
+                x += int(h * length)
                 str1 += 'G'
+                c1 += (size + PO4)
+                count += 1
             elif event.key == pg.K_g:
                 Gua(x, z, h)
-                x += int(h * 1.5)
+                x += int(h * length)
                 str1 += 'C'
-            c1 += (size + PO4)
-            count += 1
-    if x > 800:
+                c1 += (size + PO4)
+                count += 1
+    if x > 1000:
         pg.draw.rect(screen, BLACK, (0, z, SCREEN_SIZE[0], 2 * h))
-        x = 10
+        x=110
     if c1 >= SCREEN_SIZE[0] - 100:
         org -= SCREEN_SIZE[0] * 2 // 3
         c0 -= SCREEN_SIZE[0] * 2 // 3
@@ -259,3 +270,16 @@ while not finished:
             finished = True
 
 pg.quit()
+try:
+    file = open('table.txt', 'r')
+except:
+    file = open('table.txt', 'w')
+    file.close()
+    file = open('table.txt', 'r')
+
+'''запись в файл'''
+s = file.read()
+file.close()
+out = open('table.txt', 'w')
+out.write(s+'\n'+ name + "биотехнолог на" + str(procent)+"%")
+out.close()
