@@ -1,0 +1,72 @@
+import pygame
+import sys
+import random
+import pygame.freetype
+ 
+class Animation:
+    def __init__(self, screenSize):
+        self.RED = (255, 0, 0)
+        self.screenSize=screenSize
+        self.rectsize = 18
+        self.x = random.randint(0, screenSize[0]-18)
+        self.y = random.randint(0, screenSize[1]-18)
+        self.xSpeed=random.randint(-100,100)
+        self.ySpeed=random.randint(-100,100)
+
+    def move(self, sec):
+        self.x+=sec*self.xSpeed
+        self.y+=sec*self.ySpeed
+        if self.x + self.rectsize > self.screenSize[0]:
+            self.xSpeed=-self.xSpeed
+            self.x=self.screenSize[0]-self.rectsize
+        if self.x<0:
+            self.xSpeed=-self.xSpeed
+            self.x=0
+        if self.y + self.rectsize > self.screenSize[1]:
+            self.ySpeed=-self.ySpeed
+            self.y=self.screenSize[1]-self.rectsize
+        if self.y<0:
+            self.ySpeed=-self.ySpeed
+            self.y=0
+
+    def getXCoordinates(self):
+        return self.x
+
+    def getYCoordinates(self):
+        return self.y
+        
+    def changeSpeed(self, speed):
+        self.xSpeed = 0
+        self.ySpeed = 0
+
+    def setCoordinates(self, coord):
+        self.x = coord[0]
+        self.y = coord[1]
+
+    def draw(self,screen):
+        pygame.draw.rect(screen, self.RED, (self.x, self.y ,self.rectsize, self.rectsize))
+        pygame.draw.polygon(screen, self.RED, [(self.x, self.y), (self.x + 18, self.y), (self.x + 18 // 2, self.y - 18 // 2)])
+        pygame.freetype.Font(None, 18).render_to(screen, (self.x + 2, self.y + 1), "A", (0,0,0))
+
+pygame.init()
+timer = pygame.time.Clock()
+screenSize = (800,600)
+screenColor = (255,255,255)
+screen = pygame.display.set_mode (screenSize)
+ 
+rectList=[]
+
+for i in range(16):
+    rect = Animation(screenSize)
+    rectList.append(rect)
+while 1:
+    sec = timer.tick() / 1000.
+    for rect in rectList:
+        rect.move(sec)
+
+    pygame.draw.rect (screen, screenColor, pygame.Rect((0,0), screenSize))
+
+    for rect in rectList:
+        rect.draw(screen)
+   
+    pygame.display.update()
